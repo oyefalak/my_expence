@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:my_expence/model/Transaction.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   runApp(const MyApp());
@@ -22,6 +25,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
+
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key}) : super(key: key);
 
@@ -30,28 +34,30 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  List<Transaction> transaction =[
-    Transaction(
-        id: 'aa',
-        title: 'books',
-        amount: 200,
-        dateTime: DateTime.now()
-    ),
-    Transaction(
-        id: 'aa',
-        title: 'apple',
-        amount: 50,
-        dateTime: DateTime.now()
-    ),
-  ];
+  List<Transaction> transaction =[];
 
   final titleController = TextEditingController();
   final amountController = TextEditingController();
-  _addTransaction(String title, double amount){
+  var count=1;
+  void retriveData() async{
+    final prefs = await SharedPreferences.getInstance();
+    print(prefs.getString('data'));
+  }
+
+   _saveData() async {
+    final prefs = await SharedPreferences.getInstance();
+    List<Transaction> transaction =[
+      Transaction(id: 1, title: 'String', amount: 10, dateTime: (DateTime.now()))
+    ];
+    await prefs.setString('data', (transaction).toString());
+  }
+  _addTransaction(String title, double amount) async {
+    retriveData();
     print(title);
     print(amount);
+    final prefs = await SharedPreferences.getInstance();
     var newTr = Transaction(
-        id: 'aa',
+        id: count,
         title: title,
         amount: amount,
         dateTime: DateTime.now()
@@ -59,7 +65,8 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       transaction.add(newTr);
     });
-
+    await prefs.setString('data', jsonEncode(transaction));
+    count++;
   }
   @override
   Widget build(BuildContext context) {
